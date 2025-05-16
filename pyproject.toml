@@ -1,0 +1,14 @@
+[project]
+name = "delg"
+version = "0.1.0"
+description = "DELG-based feature extractor for global and local image features"
+authors = [{ name="Duje", email="your@email.com" }]
+readme = "README.md"
+license = { file="LICENSE" }
+dependencies = [
+    "tensorflow==2.8.0"
+]
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
