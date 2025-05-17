@@ -1,6 +1,6 @@
 use_local_features: false
 use_global_features: true
-model_path: "parameters/r50delg_gld_20200814"
+model_path: "delg/parameters/r50delg_gld_20200814"
 image_scales: 0.25
 image_scales: 0.35355338
 image_scales: 0.5

@@ -57,7 +57,7 @@ def MakeExtractor(config):
 
     # Input (feeds) and output (fetches) end-points. These are only needed when
     # using a model that was exported using TF1.
-    feeds = ["input_image:0", "input_scales:0"]
+    feeds = ["input_image:0", "input_scales:0", "input_global_scales_ind:0"]
     fetches = []
 
     # Custom configuration needed when local features are used.
@@ -105,17 +105,17 @@ def MakeExtractor(config):
             else:
                 local_pca_parameters["variances"] = None
 
+    if config.delf_global_config.image_scales_ind:
+        global_scales_ind_tensor = tf.constant(
+            list(config.delf_global_config.image_scales_ind)
+        )
+    else:
+        global_scales_ind_tensor = tf.range(len(config.image_scales))
+
     # Custom configuration needed when global features are used.
     if config.use_global_features:
         # Extra input/output end-points/tensors.
-        feeds.append("input_global_scales_ind:0")
         fetches.append("global_descriptors:0")
-        if config.delf_global_config.image_scales_ind:
-            global_scales_ind_tensor = tf.constant(
-                list(config.delf_global_config.image_scales_ind)
-            )
-        else:
-            global_scales_ind_tensor = tf.range(len(config.image_scales))
 
         # If using PCA, pre-load required parameters.
         global_pca_parameters = {}
@@ -236,23 +236,29 @@ def MakeExtractor(config):
                 output = [output_dict["global_descriptors"]]
         else:
             if config.use_local_features and config.use_global_features:
+                print("TU 1")
                 output = model(
-                    image_tensor,
-                    image_scales_tensor,
-                    score_threshold_tensor,
-                    max_feature_num_tensor,
-                    global_scales_ind_tensor,
+                    input_image=image_tensor,
+                    input_scales=image_scales_tensor,
+                    input_abs_thres=score_threshold_tensor,
+                    input_max_feature_num=max_feature_num_tensor,
+                    input_global_scales_ind=global_scales_ind_tensor,
                 )
             elif config.use_local_features:
+                print("TU 2")
                 output = model(
-                    image_tensor,
-                    image_scales_tensor,
-                    score_threshold_tensor,
-                    max_feature_num_tensor,
+                    input_image=image_tensor,
+                    input_scales=image_scales_tensor,
+                    input_abs_thres=score_threshold_tensor,
+                    input_max_feature_num=max_feature_num_tensor,
+                    input_global_scales_ind=global_scales_ind_tensor,  # required
                 )
             else:
+                print("TU 3")
                 output = model(
-                    image_tensor, image_scales_tensor, global_scales_ind_tensor
+                    input_image=image_tensor,
+                    input_scales=image_scales_tensor,
+                    input_global_scales_ind=global_scales_ind_tensor,
                 )
 
         # Post-process extracted features: normalize, PCA (optional), pooling.
