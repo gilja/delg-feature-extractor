@@ -12,6 +12,11 @@ from typing import Dict
 app = FastAPI()
 
 
+@app.get("/healthz")
+def health_check():
+    return {"status": "ok"}
+
+
 @app.on_event("startup")
 def load_models():
     """Load the DELG extractors once at startup and store in app state."""
@@ -21,7 +26,6 @@ def load_models():
             config_path = _default_config_path(mode)
             config = _load_config(config_path)
             app.state.extractors[mode] = extractor.MakeExtractor(config)
-            print(f"✅ Loaded DELG {mode} extractor.")
         except Exception as e:
             print(f"❌ Failed to load {mode} extractor: {e}")
             raise

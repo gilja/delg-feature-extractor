@@ -1,6 +1,6 @@
 use_local_features: true
-use_global_features: true
-model_path: "parameters/r50delg_gld_20200814"
+use_global_features: false
+model_path: "delg/parameters/r50delg_gldv2clean_20200914"
 image_scales: 0.25
 image_scales: 0.35355338
 image_scales: 0.5
@@ -11,7 +11,7 @@ image_scales: 2.0
 delf_local_config {
   use_pca: false
   max_feature_num: 1000
-  score_threshold: 175.0
+  score_threshold: 454.6
 }
 delf_global_config {
   use_pca: false

@@ -20,45 +20,6 @@
 import tensorflow as tf
 
 
-def NormalizePixelValues(image, pixel_value_offset=128.0, pixel_value_scale=128.0):
-    """Normalize image pixel values.
-
-    Args:
-      image: a uint8 tensor.
-      pixel_value_offset: a Python float, offset for normalizing pixel values.
-      pixel_value_scale: a Python float, scale for normalizing pixel values.
-
-    Returns:
-      image: a float32 tensor of the same shape as the input image.
-    """
-    image = tf.cast(image, dtype=tf.float32)
-    image = tf.truediv(tf.subtract(image, pixel_value_offset), pixel_value_scale)
-    return image
-
-
-def CalculateReceptiveBoxes(height, width, rf, stride, padding):
-    """Calculate receptive boxes for each feature point.
-
-    Args:
-      height: The height of feature map.
-      width: The width of feature map.
-      rf: The receptive field size.
-      stride: The effective stride between two adjacent feature points.
-      padding: The effective padding size.
-
-    Returns:
-      rf_boxes: [N, 4] receptive boxes tensor. Here N equals to height x width.
-      Each box is represented by [ymin, xmin, ymax, xmax].
-    """
-    x, y = tf.meshgrid(tf.range(width), tf.range(height))
-    coordinates = tf.reshape(tf.stack([y, x], axis=2), [-1, 2])
-    # [y,x,y,x]
-    point_boxes = tf.cast(tf.concat([coordinates, coordinates], 1), dtype=tf.float32)
-    bias = [-padding, -padding, -padding + rf - 1, -padding + rf - 1]
-    rf_boxes = stride * point_boxes + bias
-    return rf_boxes
-
-
 def CalculateKeypointCenters(boxes):
     """Helper function to compute feature centers, from RF boxes.
 

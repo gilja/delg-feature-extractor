@@ -21,9 +21,13 @@ packages = ["delg"]
 [tool.setuptools.package-data]
 # include configs and model weights
 "delg" = [
-    "config_*.pbtxt",
+    "model_configs/*.pbtxt",
     "parameters/*",
     "parameters/variables/*",
+]
+
+dependencies = [
+    "requests>=2.24.0",  # ✅ make this required
 ]
 
 [project.optional-dependencies]

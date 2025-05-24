@@ -1,6 +1,8 @@
 import requests
 from pathlib import Path
-from typing import List, Dict
+from typing import List, Dict, Union
+import os
+import sys
 
 SERVER_URL = "http://localhost:8080"
 
@@ -21,29 +23,17 @@ def _post_image(image_path: str, endpoint: str) -> Dict:
             raise RuntimeError(f"Failed to contact DELG server: {e}") from e
 
 
-def extract_global_features(image_path: str) -> List[float]:
-    """
-    Sends an image to the DELG server and returns the global descriptor.
-
-    Args:
-        image_path (str): Path to image file.
-
-    Returns:
-        List[float]: Global descriptor vector.
-    """
-    result = _post_image(image_path, "extract/global")
-    return result["global_descriptor"]
+def extract_global_features(
+    image_paths: Union[str, List[str]],
+) -> Union[List[float], List[List[float]]]:
+    if isinstance(image_paths, str):
+        return _post_image(image_paths, "extract/global")["global_descriptor"]
+    return [_post_image(p, "extract/global")["global_descriptor"] for p in image_paths]
 
 
-def extract_local_features(image_path: str) -> Dict:
-    """
-    Sends an image to the DELG server and returns local features.
-
-    Args:
-        image_path (str): Path to image file.
-
-    Returns:
-        Dict: Dictionary of local features with keys: locations, descriptors, scales, attention
-    """
-    result = _post_image(image_path, "extract/local")
-    return result["local_features"]
+def extract_local_features(
+    image_paths: Union[str, List[str]],
+) -> Union[Dict, List[Dict]]:
+    if isinstance(image_paths, str):
+        return _post_image(image_paths, "extract/local")["local_features"]
+    return [_post_image(p, "extract/local")["local_features"] for p in image_paths]

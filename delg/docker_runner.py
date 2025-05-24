@@ -1,14 +1,18 @@
 import subprocess
 import time
 import socket
+import os
+import atexit
+import requests
 
 DOCKER_IMAGE = "delg-server"
 DOCKER_CONTAINER = "delg-server-container"
 PORT = 8080
 
+_docker_process = None
+
 
 def is_port_open(host: str, port: int) -> bool:
-    """Check if a given host:port is accepting TCP connections."""
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.settimeout(0.5)
         try:
@@ -28,29 +32,39 @@ def docker_image_exists() -> bool:
     return result.stdout.strip() != ""
 
 
-def docker_container_running() -> bool:
-    result = subprocess.run(
-        ["docker", "ps", "--filter", f"name={DOCKER_CONTAINER}", "--format", "{{.ID}}"],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True,
-    )
-    return result.stdout.strip() != ""
-
-
 def build_docker_image():
-    print("🔨 Building Docker image...")
     subprocess.run(["docker", "build", "-t", DOCKER_IMAGE, "."], check=True)
-    print("✅ Docker image built.")
+
+
+# def wait_for_server(timeout=30):
+#     for _ in range(timeout * 2):
+#         if is_port_open("localhost", PORT):
+#             return
+#         time.sleep(0.5)
+#     raise RuntimeError("❌ Server did not become available in time.")
+
+
+def wait_for_server(timeout=30):
+    """Block until the DELG server responds on /healthz."""
+    url = f"http://localhost:{PORT}/healthz"
+    for _ in range(timeout * 2):  # 30s total wait time
+        try:
+            response = requests.get(url)
+            if response.status_code == 200:
+                return  # ✅ Only return when server is ready
+        except requests.exceptions.RequestException:
+            pass
+        time.sleep(0.5)
+    raise RuntimeError("❌ Server did not become available in time.")
 
 
 def start_docker_container():
-    print("🐳 Starting Docker container...")
-    subprocess.run(
+    global _docker_process
+
+    _docker_process = subprocess.Popen(
         [
             "docker",
             "run",
-            "-d",
             "--rm",
             "-p",
             f"{PORT}:8080",
@@ -58,25 +72,28 @@ def start_docker_container():
             DOCKER_CONTAINER,
             DOCKER_IMAGE,
         ],
-        check=True,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        preexec_fn=os.setsid,  # ensures separate process group
     )
-    print("✅ Container started.")
+
+    # Register automatic shutdown hook
+    atexit.register(stop_docker_container)
 
 
-def wait_for_server(timeout=30):
-    print("⏳ Waiting for server to become available on port", PORT)
-    for _ in range(timeout * 2):
-        if is_port_open("localhost", PORT):
-            print("🌐 Server is up!")
-            return
-        time.sleep(0.5)
-    raise RuntimeError("❌ Server did not become available in time.")
+def stop_docker_container():
+    """Stop the running Docker container if it's active."""
+    try:
+        subprocess.run(
+            ["docker", "stop", DOCKER_CONTAINER],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+    except Exception:
+        pass
 
 
 def ensure_server_running():
-    if docker_container_running():
-        return
-
     if not docker_image_exists():
         build_docker_image()
 

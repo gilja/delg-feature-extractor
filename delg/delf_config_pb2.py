@@ -268,7 +268,6 @@ _DELFLOCALFEATURECONFIG = _descriptor.Descriptor(
     serialized_end=447,
 )
 
-
 _DELFGLOBALFEATURECONFIG = _descriptor.Descriptor(
     name="DelfGlobalFeatureConfig",
     full_name="delf.protos.DelfGlobalFeatureConfig",
@@ -339,7 +338,6 @@ _DELFGLOBALFEATURECONFIG = _descriptor.Descriptor(
     serialized_start=450,
     serialized_end=580,
 )
-
 
 _DELFCONFIG = _descriptor.Descriptor(
     name="DelfConfig",

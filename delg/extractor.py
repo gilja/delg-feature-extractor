@@ -236,7 +236,6 @@ def MakeExtractor(config):
                 output = [output_dict["global_descriptors"]]
         else:
             if config.use_local_features and config.use_global_features:
-                print("TU 1")
                 output = model(
                     input_image=image_tensor,
                     input_scales=image_scales_tensor,
@@ -245,7 +244,6 @@ def MakeExtractor(config):
                     input_global_scales_ind=global_scales_ind_tensor,
                 )
             elif config.use_local_features:
-                print("TU 2")
                 output = model(
                     input_image=image_tensor,
                     input_scales=image_scales_tensor,
@@ -254,7 +252,6 @@ def MakeExtractor(config):
                     input_global_scales_ind=global_scales_ind_tensor,  # required
                 )
             else:
-                print("TU 3")
                 output = model(
                     input_image=image_tensor,
                     input_scales=image_scales_tensor,

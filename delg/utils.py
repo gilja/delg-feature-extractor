@@ -69,7 +69,9 @@ def _default_config_path(feature_type: str) -> str:
     if feature_type not in {"global", "local"}:
         raise ValueError("feature_type must be 'global' or 'local'.")
     filename = (
-        "config_global.pbtxt" if feature_type == "global" else "config_local.pbtxt"
+        "model_configs/config_global.pbtxt"
+        if feature_type == "global"
+        else "model_configs/config_local.pbtxt"
     )
     return os.path.join(os.path.dirname(__file__), filename)
 
