@@ -36,14 +36,6 @@ def build_docker_image():
     subprocess.run(["docker", "build", "-t", DOCKER_IMAGE, "."], check=True)
 
 
-# def wait_for_server(timeout=30):
-#     for _ in range(timeout * 2):
-#         if is_port_open("localhost", PORT):
-#             return
-#         time.sleep(0.5)
-#     raise RuntimeError("❌ Server did not become available in time.")
-
-
 def wait_for_server(timeout=30):
     """Block until the DELG server responds on /healthz."""
     url = f"http://localhost:{PORT}/healthz"
