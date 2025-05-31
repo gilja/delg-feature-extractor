@@ -14,7 +14,7 @@ if not _is_running_inside_docker():
 
 from .client import extract_global_features, extract_local_features
 from .config import update_global_config, update_local_config, set_docker_config
-from .similarity import cosine_similarity, local_feature_match_score
+from .similarity import cosine_similarity, local_feature_match
 
 __all__ = [
     "extract_global_features",
@@ -23,5 +23,5 @@ __all__ = [
     "update_local_config",
     "set_docker_config",
     "cosine_similarity",
-    "local_feature_match_score",
+    "local_feature_match",
 ]

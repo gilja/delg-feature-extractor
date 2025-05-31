@@ -81,7 +81,7 @@ def local_feature_match(
     num_inliers = np.sum(inliers)
 
     # Step 4: Decision based on inliers
-    print("Num inliers: {num_inliers}")
+    print(f"Num inliers: {num_inliers}")
     if num_inliers >= min_inliers:
         return True
 
