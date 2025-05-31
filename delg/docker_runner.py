@@ -4,10 +4,7 @@ import socket
 import os
 import atexit
 import requests
-
-DOCKER_IMAGE = "delg-server"
-DOCKER_CONTAINER = "delg-server-container"
-PORT = 8080
+from . import config
 
 _docker_process = None
 
@@ -24,7 +21,7 @@ def is_port_open(host: str, port: int) -> bool:
 
 def docker_image_exists() -> bool:
     result = subprocess.run(
-        ["docker", "images", "-q", DOCKER_IMAGE],
+        ["docker", "images", "-q", config.docker_image],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         text=True,
@@ -33,13 +30,13 @@ def docker_image_exists() -> bool:
 
 
 def build_docker_image():
-    subprocess.run(["docker", "build", "-t", DOCKER_IMAGE, "."], check=True)
+    subprocess.run(["docker", "build", "-t", config.docker_image, "."], check=True)
 
 
-def wait_for_server(timeout=30):
+def wait_for_server(timeout=60):
     """Block until the DELG server responds on /healthz."""
-    url = f"http://localhost:{PORT}/healthz"
-    for _ in range(timeout * 2):  # 30s total wait time
+    url = f"http://localhost:{config.docker_port}/healthz"
+    for _ in range(timeout * 2):  # 60 total wait time
         try:
             response = requests.get(url)
             if response.status_code == 200:
@@ -59,10 +56,10 @@ def start_docker_container():
             "run",
             "--rm",
             "-p",
-            f"{PORT}:8080",
+            f"{config.docker_port}:8080",
             "--name",
-            DOCKER_CONTAINER,
-            DOCKER_IMAGE,
+            config.docker_container,
+            config.docker_image,
         ],
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
@@ -77,7 +74,7 @@ def stop_docker_container():
     """Stop the running Docker container if it's active."""
     try:
         subprocess.run(
-            ["docker", "stop", DOCKER_CONTAINER],
+            ["docker", "stop", config.docker_container],
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
         )

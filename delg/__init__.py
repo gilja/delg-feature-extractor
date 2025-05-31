@@ -1,5 +1,6 @@
 import os
 import sys
+import numpy as np
 
 
 def _is_running_inside_docker() -> bool:
@@ -12,8 +13,15 @@ if not _is_running_inside_docker():
     ensure_server_running()
 
 from .client import extract_global_features, extract_local_features
+from .config import update_global_config, update_local_config, set_docker_config
+from .similarity import cosine_similarity, local_feature_match_score
 
 __all__ = [
     "extract_global_features",
     "extract_local_features",
+    "update_global_config",
+    "update_local_config",
+    "set_docker_config",
+    "cosine_similarity",
+    "local_feature_match_score",
 ]

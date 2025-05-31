@@ -10,7 +10,9 @@ RUN pip install --no-cache-dir \
     'uvicorn==0.13.4' \
     'pillow==7.2.0' \
     'numpy==1.18.5' \
-    'requests==2.24.0'
+    'requests==2.24.0' \
+    'scikit-learn==0.24.2' \
+    'scikit-image==0.17.2'
 
 # Set working directory
 WORKDIR /app

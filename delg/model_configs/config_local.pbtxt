@@ -9,12 +9,12 @@ image_scales: 1.0
 image_scales: 1.4142135
 image_scales: 2.0
 delf_local_config {
-  use_pca: false
-  max_feature_num: 1000
-  score_threshold: 454.6
+use_pca: false
+max_feature_num: 1000
+score_threshold: 454.6
 }
 delf_global_config {
-  use_pca: false
+use_pca: false
   image_scales_ind: 3
   image_scales_ind: 4
   image_scales_ind: 5
