@@ -1,5 +1,49 @@
-import numpy as np
+"""
+similarity
+==========
+
+This module provides functions to compare global and local features between
+images, including cosine similarity and local feature matching using descriptor
+matching and RANSAC geometric verification.
+
+Public functions:
+-----------------
+
+-   cosine_similarity: Computes cosine similarity between two global descriptor vectors.
+-   local_feature_match: Determines whether two images match based on their local features.
+
+For more information on the functions, refer to their docstrings.
+
+Notes:
+------
+
+Author: Duje Giljanović (giljanovic.duje@gmail.com)
+License: Apache License 2.0 (same as the official DELG implementation)
+
+This package uses the DELG model originally developed by Google Research and published
+in paper "Unifying Deep Local and Global Features for Image Search" authored by Bingyi Cao,
+Andre Araujo, and Jack Sim.
+
+If you use this Python package in your research or any other publication, please cite both this
+package and the original DELG paper as follows:
+
+@software{delg,
+    title = {delg: A Python Package for Dockerized DELG Implementation},
+    author = {Duje Giljanović},
+    year = {2025},
+    url = {https://github.com/gilja/delg-feature-extractor}
+}
+
+@article{cao2020delg,
+    title = {Unifying Deep Local and Global Features for Image Search},
+    author = {Bingyi Cao and Andre Araujo and Jack Sim},
+    journal = {arXiv preprint arXiv:2001.05027},
+    year = {2020}
+}
+"""
+
 from typing import List, Dict
+import numpy as np
 
 from scipy.spatial import cKDTree  # type: ignore
 from skimage import measure
@@ -7,12 +51,21 @@ from skimage import transform
 
 
 def cosine_similarity(vec1: List[float], vec2: List[float]) -> float:
-    """pip
+    """
     Computes cosine similarity between two global descriptor vectors.
 
+    Calculates the cosine similarity score between two input vectors, indicating
+    their similarity based on their direction in space.
+
+    Args:
+      vec1: List of floats representing the first vector.
+      vec2: List of floats representing the second vector.
+
     Returns:
-        A float value between -1 and 1 (1 = identical, 0 = orthogonal).
+      float: A similarity score between -1 and 1, where 1 means identical vectors,
+        0 means orthogonal vectors, and -1 means opposite vectors.
     """
+
     a = np.array(vec1)
     b = np.array(vec2)
     if np.linalg.norm(a) == 0 or np.linalg.norm(b) == 0:
@@ -30,17 +83,22 @@ def local_feature_match(
     """
     Determines whether two images match based on their local features.
 
+    Uses descriptor matching, Lowe's ratio test, and RANSAC geometric verification
+    to evaluate whether two images can be considered a match based on their local
+    features.
+
     Args:
-        f1 (Dict): Dictionary containing 'locations' and 'descriptors' for image 1.
-        f2 (Dict): Dictionary containing 'locations' and 'descriptors' for image 2.
-        ratio_thresh (float): Lowe's ratio test threshold.
-        ransac_residual_threshold (float): RANSAC residual threshold for geometric verification.
-        min_inliers (int): Minimum number of inliers required to consider images as matching.
+      f1: Dictionary containing 'locations' and 'descriptors' for image 1.
+      f2: Dictionary containing 'locations' and 'descriptors' for image 2.
+      ratio_thresh: Threshold for Lowe's ratio test.
+      ransac_residual_threshold: Residual threshold for RANSAC geometric verification.
+      min_inliers: Minimum number of inliers required to consider images as matching.
 
     Returns:
-        bool: True if images match, False otherwise.
+      bool: True if the images match, False otherwise.
     """
-    # Step 1: Extract descriptors and locations from both images
+
+    # Extract descriptors and locations from both images
     desc1 = np.array(f1["descriptors"])
     loc1 = np.array(f1["locations"])
     desc2 = np.array(f2["descriptors"])
@@ -50,7 +108,7 @@ def local_feature_match(
     if desc1.shape[0] < 3 or desc2.shape[0] < 3:
         return False
 
-    # Step 2: Match descriptors using KD-tree and Lowe's ratio test
+    # Match descriptors using KD-tree and Lowe's ratio test
     index_tree = cKDTree(desc2)
     distances, indices = index_tree.query(desc1, k=2, workers=-1)
 
@@ -62,7 +120,7 @@ def local_feature_match(
             matched_query_points.append(loc1[i])
             matched_index_points.append(loc2[indices[i][0]])
 
-    # Step 3: Run RANSAC to find an affine transformation and count inliers
+    # Run RANSAC to find an affine transformation and count inliers
     matched_query_points = np.array(matched_query_points)
     matched_index_points = np.array(matched_index_points)
 
@@ -80,8 +138,7 @@ def local_feature_match(
 
     num_inliers = np.sum(inliers)
 
-    # Step 4: Decision based on inliers
-    print(f"Num inliers: {num_inliers}")
+    # Decision based on inliers
     if num_inliers >= min_inliers:
         return True
 

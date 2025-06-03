@@ -1,18 +1,39 @@
-# Copyright 2017 The TensorFlow Authors All Rights Reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# ==============================================================================
-"""DELF feature extractor."""
+"""
+feature_extractor
+=================
+
+This module defines helper functions for post-processing features in the DELG
+pipeline, including keypoint center calculation, PCA and whitening transformations,
+and descriptor post-processing. These functions are used internally by the DELG
+feature extractor to prepare features for downstream tasks.
+
+Notes:
+------
+
+Author: Duje Giljanović (giljanovic.duje@gmail.com)
+License: Apache License 2.0 (same as the official DELG implementation)
+
+This package uses the DELG model originally developed by Google Research and published
+in paper "Unifying Deep Local and Global Features for Image Search" authored by Bingyi Cao,
+Andre Araujo, and Jack Sim.
+
+If you use this Python package in your research or any other publication, please cite both this
+package and the original DELG paper as follows:
+
+@software{delg,
+    title = {delg: A Python Package for Dockerized DELG Implementation},
+    author = {Duje Giljanović},
+    year = {2025},
+    url = {https://github.com/gilja/delg-feature-extractor}
+}
+
+@article{cao2020delg,
+    title = {Unifying Deep Local and Global Features for Image Search},
+    author = {Bingyi Cao and Andre Araujo and Jack Sim},
+    journal = {arXiv preprint arXiv:2001.05027},
+    year = {2020}
+}
+"""
 
 # pyright: reportAttributeAccessIssue=false
 # pylint: disable=no-member
@@ -20,37 +41,47 @@
 import tensorflow as tf
 
 
-def CalculateKeypointCenters(boxes):
-    """Helper function to compute feature centers, from RF boxes.
+def _CalculateKeypointCenters(boxes):
+    """
+    Computes the centers of feature boxes.
+
+    Calculates the center points of receptive field (RF) boxes based on their
+    corner coordinates, returning a [N, 2] tensor of centers.
 
     Args:
-      boxes: [N, 4] float tensor.
+      boxes: [N, 4] float tensor representing box coordinates.
 
     Returns:
-      centers: [N, 2] float tensor.
+      [N, 2] float tensor containing center points of the boxes.
     """
+
     return tf.divide(
         tf.add(tf.gather(boxes, [0, 1], axis=1), tf.gather(boxes, [2, 3], axis=1)), 2.0
     )
 
 
-def ApplyPcaAndWhitening(
+def _ApplyPcaAndWhitening(
     data, pca_matrix, pca_mean, output_dim, use_whitening=False, pca_variances=None
 ):
-    """Applies PCA/whitening to data.
+    """
+    Applies PCA and optional whitening to feature data.
+
+    Performs dimensionality reduction and optional whitening transformation
+    on the input data using the given PCA parameters.
 
     Args:
-      data: [N, dim] float tensor containing data which undergoes PCA/whitening.
-      pca_matrix: [dim, dim] float tensor PCA matrix, row-major.
-      pca_mean: [dim] float tensor, mean to subtract before projection.
-      output_dim: Number of dimensions to use in output data, of type int.
-      use_whitening: Whether whitening is to be used.
-      pca_variances: [dim] float tensor containing PCA variances. Only used if
+      data: [N, dim] float tensor containing the data to transform.
+      pca_matrix: [dim, dim] float tensor PCA projection matrix (row-major).
+      pca_mean: [dim] float tensor representing the mean to subtract before projection.
+      output_dim: Integer specifying the number of dimensions in the output data.
+      use_whitening: Boolean indicating whether to apply whitening.
+      pca_variances: [dim] float tensor containing PCA variances, required if
         use_whitening is True.
 
     Returns:
-      output: [N, output_dim] float tensor with output of PCA/whitening operation.
+      [N, output_dim] float tensor containing the transformed data.
     """
+
     output = tf.matmul(
         tf.subtract(data, pca_mean),
         tf.slice(pca_matrix, [0, 0], [output_dim, -1]),
@@ -69,7 +100,7 @@ def ApplyPcaAndWhitening(
     return output
 
 
-def PostProcessDescriptors(descriptors, use_pca, pca_parameters=None):
+def _PostProcessDescriptors(descriptors, use_pca, pca_parameters=None):
     """Post-process descriptors.
 
     Args:
@@ -88,7 +119,7 @@ def PostProcessDescriptors(descriptors, use_pca, pca_parameters=None):
 
     if use_pca:
         # Apply PCA, and whitening if desired.
-        final_descriptors = ApplyPcaAndWhitening(
+        final_descriptors = _ApplyPcaAndWhitening(
             final_descriptors,
             pca_parameters["matrix"],
             pca_parameters["mean"],
@@ -105,28 +136,26 @@ def PostProcessDescriptors(descriptors, use_pca, pca_parameters=None):
     return final_descriptors
 
 
-def DelfFeaturePostProcessing(boxes, descriptors, use_pca, pca_parameters=None):
-    """Extract DELF features from input image.
+def _DelfFeaturePostProcessing(boxes, descriptors, use_pca, pca_parameters=None):
+    """
+    Post-processes feature descriptors using normalization and optional PCA.
+
+    Applies L2-normalization and, if enabled, PCA and whitening to the input
+    descriptors, returning processed feature vectors ready for downstream tasks.
 
     Args:
-      boxes: [N, 4] float tensor which denotes the selected receptive box. N is
-        the number of final feature points which pass through keypoint selection
-        and NMS steps.
-      descriptors: [N, input_dim] float tensor.
-      use_pca: Whether to use PCA.
-      pca_parameters: Only used if `use_pca` is True. Dict containing PCA
-        parameter tensors, with keys 'mean', 'matrix', 'dim', 'use_whitening',
-        'variances'.
+      descriptors: [N, input_dim] float tensor containing raw descriptors.
+      use_pca: Boolean indicating whether to apply PCA.
+      pca_parameters: Optional dictionary of PCA parameter tensors (required
+        if use_pca is True), with keys 'mean', 'matrix', 'dim', 'use_whitening',
+        and 'variances'.
 
     Returns:
-      locations: [N, 2] float tensor which denotes the selected keypoint
-        locations.
-      final_descriptors: [N, output_dim] float tensor with DELF descriptors after
-        normalization and (possibly) PCA/whitening.
+      [N, output_dim] float tensor containing post-processed descriptors.
     """
 
     # Get center of descriptor boxes, corresponding to feature locations.
-    locations = CalculateKeypointCenters(boxes)
-    final_descriptors = PostProcessDescriptors(descriptors, use_pca, pca_parameters)
+    locations = _CalculateKeypointCenters(boxes)
+    final_descriptors = _PostProcessDescriptors(descriptors, use_pca, pca_parameters)
 
     return locations, final_descriptors

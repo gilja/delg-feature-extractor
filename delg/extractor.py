@@ -1,18 +1,38 @@
-# Copyright 2019 The TensorFlow Authors All Rights Reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# ==============================================================================
-"""Module to construct DELF feature extractor."""
+"""
+extractor
+=========
+
+This module defines the feature extractor for the DELG model, including support for
+both global and local feature extraction. It provides a single entry point for
+constructing a DELG feature extractor function.
+
+Notes:
+------
+
+Author: Duje Giljanović (giljanovic.duje@gmail.com)
+License: Apache License 2.0 (same as the official DELG implementation)
+
+This package uses the DELG model originally developed by Google Research and published
+in paper "Unifying Deep Local and Global Features for Image Search" authored by Bingyi Cao,
+Andre Araujo, and Jack Sim.
+
+If you use this Python package in your research or any other publication, please cite both this
+package and the original DELG paper as follows:
+
+@software{delg,
+    title = {delg: A Python Package for Dockerized DELG Implementation},
+    author = {Duje Giljanović},
+    year = {2025},
+    url = {https://github.com/gilja/delg-feature-extractor}
+}
+
+@article{cao2020delg,
+    title = {Unifying Deep Local and Global Features for Image Search},
+    author = {Bingyi Cao and Andre Araujo and Jack Sim},
+    journal = {arXiv preprint arXiv:2001.05027},
+    year = {2020}
+}
+"""
 
 # pyright: reportAttributeAccessIssue=false
 # pylint: disable=no-member
@@ -30,18 +50,25 @@ _MIN_HEIGHT = 10
 _MIN_WIDTH = 10
 
 
-def MakeExtractor(config):
-    """Creates a function to extract global and/or local features from an image.
+def _MakeExtractor(config):
+    """
+    Creates a feature extractor function based on a DELG configuration.
+
+    Loads a trained DELG model from the provided configuration, sets up input
+    and output tensors (including PCA parameters if enabled), and returns a
+    function that performs global and/or local feature extraction on input images.
 
     Args:
-      config: DelfConfig proto containing the model configuration.
+      config: DelfConfig object containing model configuration and parameters.
 
     Returns:
-      Function that receives an image and returns features.
+      Function: A callable that receives an image and returns extracted features
+        as a dictionary.
 
     Raises:
-      ValueError: if config is invalid.
+      ValueError: If neither local nor global features are enabled in the configuration.
     """
+
     # Assert the configuration.
     if not config.use_local_features and not config.use_global_features:
         raise ValueError(
@@ -154,23 +181,26 @@ def MakeExtractor(config):
         model = model.prune(feeds=feeds, fetches=fetches)
 
     def ExtractorFn(image, resize_factor=1.0):
-        """Receives an image and returns DELF global and/or local features.
+        """
+        Extracts DELG global and/or local features from an input image.
 
-        If image is too small, returns empty features.
+        Preprocesses the image, performs feature extraction using the loaded
+        DELG model, and returns a dictionary of extracted features including
+        global descriptors and/or local features.
 
         Args:
-          image: Uint8 array with shape (height, width, 3) containing the RGB image.
-          resize_factor: Optional float resize factor for the input image. If given,
-            the maximum and minimum allowed image sizes in the config are scaled by
-            this factor.
+          image: Uint8 NumPy array with shape (height, width, 3) representing the RGB image.
+          resize_factor: Optional float scale factor for resizing the image
+            before extraction.
 
         Returns:
-          extracted_features: A dict containing the extracted global descriptors
-            (key 'global_descriptor' mapping to a [D] float array), and/or local
-            features (key 'local_features' mapping to a dict with keys 'locations',
-            'descriptors', 'scales', 'attention').
+          dict: A dictionary containing:
+            - 'global_descriptor' (if global features enabled): NumPy array of floats.
+            - 'local_features' (if local features enabled): Dictionary containing
+              'locations', 'descriptors', 'scales', and 'attention' arrays.
         """
-        resized_image, scale_factors = utils.ResizeImage(
+
+        resized_image, scale_factors = utils._ResizeImage(
             image, config, resize_factor=resize_factor
         )
 
@@ -261,7 +291,7 @@ def MakeExtractor(config):
         # Post-process extracted features: normalize, PCA (optional), pooling.
         if config.use_global_features:
             raw_global_descriptors = output[-1]
-            global_descriptors_per_scale = feature_extractor.PostProcessDescriptors(
+            global_descriptors_per_scale = feature_extractor._PostProcessDescriptors(
                 raw_global_descriptors,
                 config.delf_global_config.use_pca,
                 global_pca_parameters,
@@ -287,7 +317,7 @@ def MakeExtractor(config):
             attention = tf.reshape(
                 attention_with_extra_dim, [tf.shape(attention_with_extra_dim)[0]]
             )
-            locations, local_descriptors = feature_extractor.DelfFeaturePostProcessing(
+            locations, local_descriptors = feature_extractor._DelfFeaturePostProcessing(
                 boxes,
                 raw_local_descriptors,
                 config.delf_local_config.use_pca,

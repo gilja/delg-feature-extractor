@@ -1,18 +1,39 @@
-# Copyright 2020 The TensorFlow Authors All Rights Reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# ==============================================================================
-"""Helper functions for DELF."""
+"""
+utils
+=====
+
+This module provides utility functions for handling images and configuration
+files in the DELG feature extraction pipeline. It includes functions for
+loading and resizing images, resolving configuration file paths, and parsing
+configuration files.
+
+Notes:
+------
+
+Author: Duje Giljanović (giljanovic.duje@gmail.com)
+License: Apache License 2.0 (same as the official DELG implementation)
+
+This package uses the DELG model originally developed by Google Research and published
+in paper "Unifying Deep Local and Global Features for Image Search" authored by Bingyi Cao,
+Andre Araujo, and Jack Sim.
+
+If you use this Python package in your research or any other publication, please cite both this
+package and the original DELG paper as follows:
+
+@software{delg,
+    title = {delg: A Python Package for Dockerized DELG Implementation},
+    author = {Duje Giljanović},
+    year = {2025},
+    url = {https://github.com/gilja/delg-feature-extractor}
+}
+
+@article{cao2020delg,
+    title = {Unifying Deep Local and Global Features for Image Search},
+    author = {Bingyi Cao and Andre Araujo and Jack Sim},
+    journal = {arXiv preprint arXiv:2001.05027},
+    year = {2020}
+}
+"""
 
 import os
 import numpy as np
@@ -29,43 +50,42 @@ from . import delf_config_pb2
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 
-def read_image_to_uint8(path: str) -> np.ndarray:
+def _read_image_to_uint8(path: str) -> np.ndarray:
     """
-    Load an image from disk and convert it to an RGB NumPy array of dtype uint8.
+    Loads an image from disk and converts it to an RGB NumPy array of dtype uint8.
 
-    This helper opens an image file using the Pillow library, converts it to RGB
-    color mode (ensuring consistency across grayscale or palette images), and
-    returns the result as a NumPy array with dtype `uint8`, suitable for use with
-    DELG feature extractors.
+    Opens an image file using the Pillow library, converts it to RGB color mode,
+    and returns the image as a NumPy array suitable for use with DELG feature
+    extractors.
 
     Args:
-        path (str): Path to the image file to load.
+      path: String path to the image file.
 
     Returns:
-        np.ndarray: A 3D array of shape (H, W, 3) with dtype `uint8` representing
-                    the RGB image.
+      numpy.ndarray: 3D array of shape (H, W, 3) representing the RGB image.
     """
+
     image = Image.open(path).convert("RGB")
     return np.array(image)
 
 
 def _default_config_path(feature_type: str) -> str:
     """
-    Resolve the default config file path for DELG feature extraction.
+    Resolves the default config file path for DELG feature extraction.
 
-    Based on the requested feature type ('global' or 'local'), this helper
-    constructs the absolute path to the corresponding `.pbtxt` configuration file
-    located in the same directory as this module.
+    Constructs the absolute path to the appropriate `.pbtxt` configuration file
+    (either global or local) located in the same directory as this module.
 
     Args:
-        feature_type (str): Type of feature to extract, must be either 'global' or 'local'.
+      feature_type: String indicating the type of feature to extract. Must be either 'global' or 'local'.
 
     Returns:
-        str: Full path to the corresponding DELG config `.pbtxt` file.
+      str: Full path to the corresponding DELG configuration `.pbtxt` file.
 
     Raises:
-        ValueError: If `feature_type` is not 'global' or 'local'.
+      ValueError: If feature_type is not 'global' or 'local'.
     """
+
     if feature_type not in {"global", "local"}:
         raise ValueError("feature_type must be 'global' or 'local'.")
     filename = (
@@ -78,20 +98,21 @@ def _default_config_path(feature_type: str) -> str:
 
 def _load_config(config_path: str):
     """
-    Load and parse a DELG configuration file in `.pbtxt` format.
+    Loads and parses a DELG configuration file in `.pbtxt` format.
 
-    This helper reads a text-based DELG configuration file, parses it into a
-    `DelfConfig` protobuf object, and returns the result for use in extractor setup.
+    Reads a text-based DELG configuration file, parses it into a DelfConfig
+    protobuf object, and returns the configuration for use in extractor setup.
 
     Args:
-        config_path (str): Path to the `.pbtxt` file containing the DELG config.
+      config_path: String path to the `.pbtxt` file containing the DELG config.
 
     Returns:
-        delf_config_pb2.DelfConfig: Parsed configuration object.
+      delf_config_pb2.DelfConfig: Parsed configuration object.
 
     Raises:
-        FileNotFoundError: If the specified config file does not exist.
+      FileNotFoundError: If the specified config file does not exist.
     """
+
     if not os.path.exists(config_path):
         raise FileNotFoundError(f"Config file not found: {config_path}")
     config = delf_config_pb2.DelfConfig()
@@ -100,42 +121,51 @@ def _load_config(config_path: str):
     return config
 
 
-def RgbLoader(path):
-    """Helper function to read image with PIL.
+def _RgbLoader(path):
+    """
+    Loads an image using PIL and converts it to RGB format.
+
+    Opens an image file using TensorFlow's file I/O and PIL, then ensures the
+    image is in RGB color mode.
 
     Args:
-      path: Path to image to be loaded.
+      path: String path to the image to be loaded.
 
     Returns:
-      PIL image in RGB format.
+      PIL.Image.Image: The loaded image in RGB format.
     """
+
     with tf.io.gfile.GFile(path, "rb") as f:
         img = Image.open(f)
         return img.convert("RGB")
 
 
-def ResizeImage(image, config, resize_factor=1.0):
-    """Resizes image according to config.
+def _ResizeImage(image, config, resize_factor=1.0):
+    """
+    Resizes an image according to the DELG configuration.
+
+    Applies resizing rules from the DELG configuration, including maximum and minimum
+    image sizes, optional resize factor, and optional square resizing. Returns the resized
+    image along with scale factors for height and width.
 
     Args:
-      image: Uint8 array with shape (height, width, 3).
-      config: DelfConfig proto containing the model configuration.
-      resize_factor: Optional float resize factor for the input image. If given,
-        the maximum and minimum allowed image sizes in `config` are scaled by this
-        factor. Must be non-negative.
+      image: Uint8 NumPy array of shape (height, width, 3) representing the RGB image.
+      config: DelfConfig object containing the model configuration.
+      resize_factor: Optional float scale factor applied to max/min image sizes.
 
     Returns:
-      resized_image: Uint8 array with resized image.
-      scale_factors: 2D float array, with factors used for resizing along height
-        and width (If upscaling, larger than 1; if downscaling, smaller than 1).
+      resized_image: Uint8 NumPy array containing the resized image.
+      scale_factors: 1D float NumPy array containing height and width scale factors.
 
     Raises:
-      ValueError: If `image` has incorrect number of dimensions/channels.
+      ValueError: If image has incorrect number of dimensions or channels, or if
+        resize_factor is negative.
     """
+
     if resize_factor < 0.0:
-        raise ValueError("negative resize_factor is not allowed: %f" % resize_factor)
+        raise ValueError(f"negative resize_factor is not allowed: {resize_factor}")
     if image.ndim != 3:
-        raise ValueError("image has incorrect number of dimensions: %d" % image.ndims)
+        raise ValueError(f"image has incorrect number of dimensions: {image.ndims}")
     height, width, channels = image.shape
 
     # Take into account resize factor.
@@ -143,7 +173,7 @@ def ResizeImage(image, config, resize_factor=1.0):
     min_image_size = resize_factor * config.min_image_size
 
     if channels != 3:
-        raise ValueError("image has incorrect number of channels: %d" % channels)
+        raise ValueError(f"image has incorrect number of channels: {channels}")
 
     largest_side = max(width, height)
 

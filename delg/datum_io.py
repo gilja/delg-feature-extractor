@@ -1,24 +1,40 @@
-# Copyright 2017 The TensorFlow Authors All Rights Reserved.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# ==============================================================================
-"""Python interface for DatumProto.
-
-DatumProto is protocol buffer used to serialize tensor with arbitrary shape.
-Please refer to datum.proto for details.
-
-Support read and write of DatumProto from/to NumPy array and file.
 """
+datum_io
+========
+
+This module provides a Python interface for working with DatumProto, a protocol buffer
+used to serialize tensors with arbitrary shapes. It allows reading data from DatumProto
+files, converting serialized DatumProto strings to NumPy arrays, and supporting conversions
+between DatumProto objects and NumPy arrays.
+
+Notes:
+------
+
+Author: Duje Giljanović (giljanovic.duje@gmail.com)
+License: Apache License 2.0 (same as the official DELG implementation)
+
+This package uses the DELG model originally developed by Google Research and published
+in paper "Unifying Deep Local and Global Features for Image Search" authored by Bingyi Cao,
+Andre Araujo, and Jack Sim.
+
+If you use this Python package in your research or any other publication, please cite both this
+package and the original DELG paper as follows:
+
+@software{delg,
+    title = {delg: A Python Package for Dockerized DELG Implementation},
+    author = {Duje Giljanović},
+    year = {2025},
+    url = {https://github.com/gilja/delg-feature-extractor}
+}
+
+@article{cao2020delg,
+    title = {Unifying Deep Local and Global Features for Image Search},
+    author = {Bingyi Cao and Andre Araujo and Jack Sim},
+    journal = {arXiv preprint arXiv:2001.05027},
+    year = {2020}
+}
+"""
+
 # pyright: reportAttributeAccessIssue=false
 # pylint: disable=no-member
 
@@ -27,14 +43,23 @@ import tensorflow as tf
 
 
 def DatumToArray(datum):
-    """Converts data saved in DatumProto to NumPy array.
+    """
+    Converts a DatumProto object to a NumPy array.
+
+    Converts the contents of a DatumProto object—either a float_list or
+    uint32_list—into a NumPy array with the shape specified in the DatumProto.
 
     Args:
-      datum: DatumProto object.
+      datum: DatumProto object containing either 'float_list' or 'uint32_list'
+        and a 'shape' field.
 
     Returns:
-      NumPy array of arbitrary shape.
+      numpy.ndarray: A NumPy array with the shape specified in datum.shape.dim.
+
+    Raises:
+      ValueError: If the DatumProto does not contain a float_list or uint32_list.
     """
+
     if datum.HasField("float_list"):
         return (
             np.array(datum.float_list.value).astype("float32").reshape(datum.shape.dim)
@@ -48,27 +73,37 @@ def DatumToArray(datum):
 
 
 def ParseFromString(string):
-    """Converts serialized DatumProto string to NumPy array.
+    """
+    Converts a serialized DatumProto string to a NumPy array.
+
+    Parses a DatumProto string and converts it to a NumPy array using the DatumToArray function.
 
     Args:
       string: Serialized DatumProto string.
 
     Returns:
-      NumPy array.
+      numpy.ndarray: A NumPy array representation of the data.
     """
+
     datum = datum_pb2.DatumProto()
     datum.ParseFromString(string)
+
     return DatumToArray(datum)
 
 
 def ReadFromFile(file_path):
-    """Helper function to load data from a DatumProto format in a file.
+    """
+    Reads data from a DatumProto-formatted file and returns a NumPy array.
+
+    Opens a file containing a serialized DatumProto object, parses it, and converts
+    it to a NumPy array using ParseFromString.
 
     Args:
-      file_path: Path to file containing data.
+      file_path: Path to the file containing the serialized DatumProto object.
 
     Returns:
-      data: NumPy array.
+      numpy.ndarray: A NumPy array representation of the data.
     """
+
     with tf.io.gfile.GFile(file_path, "rb") as f:
         return ParseFromString(f.read())

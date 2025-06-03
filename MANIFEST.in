@@ -3,15 +3,10 @@ include README.md
 include LICENSE
 include pyproject.toml
 include entrypoint.py
+include Dockerfile
 
 # Include all protocol buffer configs
-recursive-include delg *.pbtxt
-
-# Include model weights and variables
-recursive-include delg/parameters *
-
-# Include any compiled protos (optional but recommended if generated)
-recursive-include delg *.py
+recursive-include delg/model_configs *.pbtxt
 
 # Include Python source code
 recursive-include delg *.py
