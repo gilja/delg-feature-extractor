@@ -43,7 +43,7 @@ package and the original DELG paper as follows:
 }
 """
 
-from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi import FastAPI, File, UploadFile, HTTPException, Request
 from fastapi.responses import JSONResponse
 from typing_extensions import Literal
 import numpy as np
@@ -53,6 +53,8 @@ from PIL import Image
 from delg import extractor
 from delg.utils import _load_config, _default_config_path
 from typing import Dict
+
+from google.protobuf import text_format
 
 app = FastAPI()
 
@@ -179,3 +181,31 @@ async def extract_local(image: UploadFile = File(...)):
     image_bytes = await image.read()
     result = _extract_features(image_bytes, mode="local")
     return JSONResponse(content=result)
+
+
+@app.post("/config/local")
+async def update_local_config_api(request: Request):
+    """
+    Updates the local DELG configuration inside the container.
+    """
+    try:
+        data = await request.json()
+        max_feature_num = data.get("max_feature_num")
+        score_threshold = data.get("score_threshold")
+
+        if max_feature_num is None or score_threshold is None:
+            raise HTTPException(status_code=400, detail="Missing parameters")
+
+        config_path = _default_config_path("local")
+        config = _load_config(config_path)
+
+        config.delf_local_config.max_feature_num = max_feature_num
+        config.delf_local_config.score_threshold = score_threshold
+
+        with open(config_path, "w", encoding="utf-8") as f:
+            f.write(text_format.MessageToString(config))
+
+        return {"status": "updated"}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to update config: {e}")
