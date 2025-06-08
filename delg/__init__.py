@@ -52,6 +52,11 @@ package and the original DELG paper as follows:
 import os
 import sys
 
+PACKAGE_DIR = os.path.dirname(__file__)
+MODEL_WEIGHTS_PATH = os.path.join(
+    PACKAGE_DIR, "parameters", "r50delg_gldv2clean_20200914", "saved_model.pb"
+)
+
 
 def _is_running_inside_docker() -> bool:
     """
@@ -64,12 +69,12 @@ def _is_running_inside_docker() -> bool:
       bool: True if running inside Docker, False otherwise.
     """
 
-    return os.path.exists("/.dockerenv") or "entrypoint.py" in sys.argv[0]
+    return os.path.exists("/.dockerenv")
 
 
 if not _is_running_inside_docker():
     # Ensure model weights exist BEFORE container build
-    if not os.path.exists("delg/parameters/saved_model.pb"):
+    if not os.path.exists(MODEL_WEIGHTS_PATH):
         from . import model_weights
 
         model_weights.download_weights()

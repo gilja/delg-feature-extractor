@@ -10,9 +10,8 @@ Public functions:
 
 -   set_docker_config: Sets Docker runtime configuration variables (image name, container
     name, and port).
--   update_global_config: Updates the 'use_pca' setting in the global DELG configuration file.
--   update_local_config: Updates the 'use_pca', 'max_feature_num', and 'score_threshold'
-    settings in the local DELG configuration file.
+-   update_local_config: Updates the 'max_feature_num', and 'score_threshold' settings
+    in the local DELG configuration file.
 
 For more information on the functions, refer to their docstrings.
 
@@ -82,6 +81,26 @@ def set_docker_config(image=None, container=None, port=None):
 
 
 def update_local_config(max_feature_num=1000, score_threshold=54.6):
+    """
+    Updates the local DELG configuration in the Docker server.
+
+    Sends a POST request to the DELG server to update the local configuration parameters
+    (max_feature_num and score_threshold) used during local feature extraction. This function
+    allows dynamic reconfiguration of the local DELG extractor without restarting the server.
+
+    Args:
+      max_feature_num (int, optional): The maximum number of local features to extract per image.
+                                       Defaults to 1000.
+      score_threshold (float, optional): The attention score threshold for selecting local features.
+                                         Defaults to 54.6.
+
+    Returns:
+      dict: JSON response from the server indicating success status and any additional information.
+
+    Raises:
+      requests.exceptions.RequestException: If the POST request fails or the server returns an error.
+    """
+
     url = f"http://localhost:{docker_port}/config/local"
     payload = {"max_feature_num": max_feature_num, "score_threshold": score_threshold}
     response = requests.post(url, json=payload, timeout=5)

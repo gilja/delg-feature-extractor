@@ -62,7 +62,8 @@ def download_weights():
       RuntimeError: If the download or extraction process fails.
     """
 
-    destination_dir = "delg/parameters"
+    PACKAGE_DIR = os.path.dirname(__file__)
+    destination_dir = os.path.join(PACKAGE_DIR, "parameters")
 
     if not os.path.exists(destination_dir):
         os.makedirs(destination_dir)

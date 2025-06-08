@@ -48,8 +48,9 @@ import requests
 from pathlib import Path
 from typing import List, Dict, Union, Optional
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from . import config
 
-SERVER_URL = "http://localhost:8080"
+SERVER_URL = f"http://localhost:{config.docker_port}"
 
 
 def _post_image(image_path: str, endpoint: str) -> Dict:

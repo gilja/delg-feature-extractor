@@ -187,7 +187,24 @@ async def extract_local(image: UploadFile = File(...)):
 async def update_local_config_api(request: Request):
     """
     Updates the local DELG configuration inside the container.
+
+    Accepts a JSON payload containing the 'max_feature_num' and 'score_threshold'
+    parameters, validates their presence, updates the local configuration file,
+    and persists the changes. If successful, returns a status message indicating
+    the update was applied.
+
+    Args:
+      request (Request): The FastAPI Request object containing the JSON payload.
+
+    Returns:
+      dict: A dictionary containing a 'status' key indicating the update result.
+
+    Raises:
+      HTTPException:
+        - status_code=400 if any required parameter is missing from the payload.
+        - status_code=500 if any unexpected error occurs during processing.
     """
+
     try:
         data = await request.json()
         max_feature_num = data.get("max_feature_num")
@@ -207,5 +224,7 @@ async def update_local_config_api(request: Request):
 
         return {"status": "updated"}
 
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to update config: {e}")
+    except OSError as e:
+        raise HTTPException(
+            status_code=500, detail=f"Failed to update config file: {e}"
+        )

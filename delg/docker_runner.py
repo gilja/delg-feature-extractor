@@ -34,6 +34,7 @@ package and the original DELG paper as follows:
 }
 """
 
+import os
 import subprocess
 import time
 import atexit
@@ -78,13 +79,22 @@ def _build_docker_image():
     Builds the DELG Docker image locally.
 
     Runs the Docker build command using the image name specified in the configuration,
-    building the Docker image from the current directory.
+    building the Docker image from the directory containing the Dockerfile.
 
     Raises:
       subprocess.CalledProcessError: If the Docker build process fails.
     """
+    # Find the directory containing this module (__file__) and move one level up
+    PACKAGE_DIR = os.path.dirname(__file__)
+    PROJECT_ROOT = os.path.abspath(os.path.join(PACKAGE_DIR, ".."))
 
-    subprocess.run(["docker", "build", "-t", config.docker_image, "."], check=True)
+    dockerfile_path = os.path.join(PROJECT_ROOT, "Dockerfile")
+    if not os.path.exists(dockerfile_path):
+        raise FileNotFoundError(f"Dockerfile not found at {dockerfile_path}")
+
+    subprocess.run(
+        ["docker", "build", "-t", config.docker_image, PROJECT_ROOT], check=True
+    )
 
 
 def _wait_for_server(timeout=60):
