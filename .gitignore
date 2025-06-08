@@ -3,4 +3,4 @@ examples
 delg/**/parameters
 delg.egg-info/
 .vscode/
-
+.DS_Store
