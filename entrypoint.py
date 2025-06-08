@@ -2,27 +2,29 @@
 entrypoint
 ==========
 
-This module defines the FastAPI application and its endpoints for the DELG
-feature extractor. It includes health checks, global feature extraction,
-and local feature extraction endpoints.
+This module defines the FastAPI application and its HTTP endpoints for the DELG
+feature extractor server. It includes endpoints for server health checks, global
+feature extraction, local feature extraction, and dynamic local configuration updates.
 
 Public endpoints:
 -----------------
+- health_check: GET endpoint that returns the server health status.
+- extract_global: POST endpoint that extracts global features from an uploaded image.
+- extract_local: POST endpoint that extracts local features from an uploaded image.
+- update_local_config_api: POST endpoint to update local feature extraction configuration.
 
--   health_check: GET endpoint that returns the server health status.
--   extract_global: POST endpoint that extracts global features from an image.
--   extract_local: POST endpoint that extracts local features from an image.
+At server startup, this module also initializes the DELG extractors by loading the
+required configurations and models.
 
-For more information on the endpoints, refer to their docstrings.
+For more information on the endpoints, refer to their individual docstrings.
 
 Notes:
 ------
-
 Author: Duje Giljanović (giljanovic.duje@gmail.com)
 License: Apache License 2.0 (same as the official DELG implementation)
 
 This package uses the DELG model originally developed by Google Research and published
-in paper "Unifying Deep Local and Global Features for Image Search" authored by Bingyi Cao,
+in the paper "Unifying Deep Local and Global Features for Image Search" authored by Bingyi Cao,
 Andre Araujo, and Jack Sim.
 
 If you use this Python package in your research or any other publication, please cite both this

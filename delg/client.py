@@ -2,28 +2,31 @@
 client
 ======
 
-This module provides a high-level client interface for interacting with the DELG feature
-extraction server. It allows users to extract global and local features from single or
-multiple images, supporting both sequential and parallel processing.
+High-level client interface for interacting with the DELG feature extraction server.
+This module allows users to extract global and local features from single or multiple
+images by sending HTTP requests to the running FastAPI-based DELG server, supporting both
+sequential and parallel processing.
+
+Note:
+- The DELG server is started automatically by the package upon import, so users do not
+  need to start it manually.
 
 Public functions:
 -----------------
-
--   extract_global_features: Extracts global features from one or more images by sending
-    requests to the server.
--   extract_local_features: Extracts local features from one or more images by sending
-    requests to the server.
+- extract_global_features: Extracts global features from one or more images by sending
+  requests to the server.
+- extract_local_features: Extracts local features from one or more images by sending
+  requests to the server.
 
 For more information on the functions, refer to their docstrings.
 
 Notes:
 ------
-
 Author: Duje Giljanović (giljanovic.duje@gmail.com)
 License: Apache License 2.0 (same as the official DELG implementation)
 
 This package uses the DELG model originally developed by Google Research and published
-in paper "Unifying Deep Local and Global Features for Image Search" authored by Bingyi Cao,
+in the paper "Unifying Deep Local and Global Features for Image Search" authored by Bingyi Cao,
 Andre Araujo, and Jack Sim.
 
 If you use this Python package in your research or any other publication, please cite both this

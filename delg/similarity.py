@@ -3,25 +3,28 @@ similarity
 ==========
 
 This module provides functions to compare global and local features between
-images, including cosine similarity and local feature matching using descriptor
-matching and RANSAC geometric verification.
+images, including cosine similarity for global descriptors and a two-stage
+approach for local features using descriptor matching (via KD-trees and Lowe’s
+ratio test) followed by RANSAC geometric verification.
 
 Public functions:
 -----------------
+- cosine_similarity: Computes cosine similarity between two global descriptor vectors.
+- local_feature_match: Determines whether two images match based on their local features
+  using descriptor matching and RANSAC geometric verification.
 
--   cosine_similarity: Computes cosine similarity between two global descriptor vectors.
--   local_feature_match: Determines whether two images match based on their local features.
+These functions are standalone utilities that can be used independently from the
+server-based feature extraction pipeline.
 
 For more information on the functions, refer to their docstrings.
 
 Notes:
 ------
-
 Author: Duje Giljanović (giljanovic.duje@gmail.com)
 License: Apache License 2.0 (same as the official DELG implementation)
 
 This package uses the DELG model originally developed by Google Research and published
-in paper "Unifying Deep Local and Global Features for Image Search" authored by Bingyi Cao,
+in the paper "Unifying Deep Local and Global Features for Image Search" authored by Bingyi Cao,
 Andre Araujo, and Jack Sim.
 
 If you use this Python package in your research or any other publication, please cite both this

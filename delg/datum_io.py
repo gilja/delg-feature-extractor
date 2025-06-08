@@ -2,19 +2,18 @@
 datum_io
 ========
 
-This module provides a Python interface for working with DatumProto, a protocol buffer
-used to serialize tensors with arbitrary shapes. It allows reading data from DatumProto
-files, converting serialized DatumProto strings to NumPy arrays, and supporting conversions
-between DatumProto objects and NumPy arrays.
+This module provides utility functions for working with DatumProto, a protocol buffer
+used by TensorFlow and DELG to serialize tensors of arbitrary shape. It allows reading
+data from DatumProto files, parsing serialized DatumProto strings, and converting these
+data into NumPy arrays for downstream processing in the DELG feature extraction pipeline.
 
 Notes:
 ------
-
 Author: Duje Giljanović (giljanovic.duje@gmail.com)
 License: Apache License 2.0 (same as the official DELG implementation)
 
 This package uses the DELG model originally developed by Google Research and published
-in paper "Unifying Deep Local and Global Features for Image Search" authored by Bingyi Cao,
+in the paper "Unifying Deep Local and Global Features for Image Search" authored by Bingyi Cao,
 Andre Araujo, and Jack Sim.
 
 If you use this Python package in your research or any other publication, please cite both this

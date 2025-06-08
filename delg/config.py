@@ -2,27 +2,30 @@
 config
 ======
 
-This module defines helper functions for configuring the Docker runtime and
-adjusting DELG model parameters used during feature extraction.
+This module provides helper functions to configure Docker runtime settings
+(image name, container name, and port) and to adjust DELG model parameters
+(such as the maximum number of local features and attention score threshold)
+used during feature extraction.
+
+Use this module to customize the container environment or dynamically
+fine-tune local feature extraction parameters without restarting the server.
 
 Public functions:
 -----------------
-
--   set_docker_config: Sets Docker runtime configuration variables (image name, container
-    name, and port).
--   update_local_config: Updates the 'max_feature_num', and 'score_threshold' settings
-    in the local DELG configuration file.
+- set_docker_config: Sets Docker runtime configuration variables (image name,
+  container name, and port).
+- update_local_config: Updates the 'max_feature_num' and 'score_threshold' settings
+  in the local DELG configuration file by sending a request to the running server.
 
 For more information on the functions, refer to their docstrings.
 
 Notes:
 ------
-
 Author: Duje Giljanović (giljanovic.duje@gmail.com)
 License: Apache License 2.0 (same as the official DELG implementation)
 
 This package uses the DELG model originally developed by Google Research and published
-in paper "Unifying Deep Local and Global Features for Image Search" authored by Bingyi Cao,
+in the paper "Unifying Deep Local and Global Features for Image Search" authored by Bingyi Cao,
 Andre Araujo, and Jack Sim.
 
 If you use this Python package in your research or any other publication, please cite both this

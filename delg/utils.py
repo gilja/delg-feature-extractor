@@ -2,19 +2,23 @@
 utils
 =====
 
-This module provides utility functions for handling images and configuration
+This module provides internal utility functions for handling images and configuration
 files in the DELG feature extraction pipeline. It includes functions for
-loading and resizing images, resolving configuration file paths, and parsing
-configuration files.
+loading and resizing images (to match the model’s expected input sizes),
+resolving configuration file paths, and parsing configuration files
+(serialized in the .pbtxt format using Google’s protobuf).
+
+These functions are intended for internal use only and are not part of the package’s
+public API. They are used by other modules to support the DELG feature extraction
+workflow.
 
 Notes:
 ------
-
 Author: Duje Giljanović (giljanovic.duje@gmail.com)
 License: Apache License 2.0 (same as the official DELG implementation)
 
 This package uses the DELG model originally developed by Google Research and published
-in paper "Unifying Deep Local and Global Features for Image Search" authored by Bingyi Cao,
+in the paper "Unifying Deep Local and Global Features for Image Search" authored by Bingyi Cao,
 Andre Araujo, and Jack Sim.
 
 If you use this Python package in your research or any other publication, please cite both this

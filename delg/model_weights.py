@@ -3,25 +3,30 @@ model_weights
 =============
 
 This module provides a helper function to download the pretrained DELG model
-weights and extract them into the appropriate directory for use during feature
-extraction.
+weights from Google Cloud Storage and extract them into the appropriate directory
+for use during feature extraction. The model weights are stored in TensorFlow’s
+SavedModel format and placed in the 'parameters' subdirectory located inside the
+installed 'delg' package directory.
+
+The download_weights function is idempotent, ensuring that the model is always
+available for the extractor without redundant downloads. It is called automatically
+at package initialization if the weights are not already present but can also be
+called manually if needed.
 
 Public functions:
 -----------------
-
--   download_weights: Downloads the DELG model weights and extracts them into
-    the ./delg/parameters directory.
+- download_weights: Downloads the DELG model weights and extracts them into
+  the 'parameters' subdirectory within the installed 'delg' package directory.
 
 For more information on the function, refer to its docstring.
 
 Notes:
 ------
-
 Author: Duje Giljanović (giljanovic.duje@gmail.com)
 License: Apache License 2.0 (same as the official DELG implementation)
 
 This package uses the DELG model originally developed by Google Research and published
-in paper "Unifying Deep Local and Global Features for Image Search" authored by Bingyi Cao,
+in the paper "Unifying Deep Local and Global Features for Image Search" authored by Bingyi Cao,
 Andre Araujo, and Jack Sim.
 
 If you use this Python package in your research or any other publication, please cite both this

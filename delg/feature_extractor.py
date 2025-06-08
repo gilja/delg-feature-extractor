@@ -2,19 +2,23 @@
 feature_extractor
 =================
 
-This module defines helper functions for post-processing features in the DELG
-pipeline, including keypoint center calculation, PCA and whitening transformations,
-and descriptor post-processing. These functions are used internally by the DELG
-feature extractor to prepare features for downstream tasks.
+This module defines internal helper functions for post-processing features
+in the DELG pipeline, including keypoint center calculation and descriptor
+post-processing. These functions are used by the DELG feature extractor to
+prepare features for downstream tasks such as feature comparison and matching.
+
+Note:
+- While some legacy code exists for PCA and whitening transformations, these
+  are not actually used in the DELG implementation. They remain in the code
+  for potential future extensions but are not active in the current workflow.
 
 Notes:
 ------
-
 Author: Duje Giljanović (giljanovic.duje@gmail.com)
 License: Apache License 2.0 (same as the official DELG implementation)
 
 This package uses the DELG model originally developed by Google Research and published
-in paper "Unifying Deep Local and Global Features for Image Search" authored by Bingyi Cao,
+in the paper "Unifying Deep Local and Global Features for Image Search" authored by Bingyi Cao,
 Andre Araujo, and Jack Sim.
 
 If you use this Python package in your research or any other publication, please cite both this

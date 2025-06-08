@@ -2,18 +2,22 @@
 docker_runner
 =============
 
-This module provides helper functions for managing the DELG Docker container,
-including checking Docker image availability, building the Docker image, starting
-and stopping the container, and ensuring the server is running before feature extraction.
+This module provides internal helper functions for managing the DELG Docker container,
+including checking Docker image availability, building the Docker image, starting and
+stopping the container, and ensuring the server is running before feature extraction.
+
+These functions are intended for internal use only and are orchestrated automatically
+by the package. The container is started when needed and automatically shut down when
+the Python process that imported this package exits, ensuring resources are cleaned up
+properly.
 
 Notes:
 ------
-
 Author: Duje Giljanović (giljanovic.duje@gmail.com)
 License: Apache License 2.0 (same as the official DELG implementation)
 
 This package uses the DELG model originally developed by Google Research and published
-in paper "Unifying Deep Local and Global Features for Image Search" authored by Bingyi Cao,
+in the paper "Unifying Deep Local and Global Features for Image Search" authored by Bingyi Cao,
 Andre Araujo, and Jack Sim.
 
 If you use this Python package in your research or any other publication, please cite both this

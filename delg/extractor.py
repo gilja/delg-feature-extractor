@@ -3,17 +3,23 @@ extractor
 =========
 
 This module defines the feature extractor for the DELG model, including support for
-both global and local feature extraction. It provides a single entry point for
-constructing a DELG feature extractor function.
+both global and local feature extraction. It provides a single entry point
+(_MakeExtractor) for constructing a DELG feature extractor function that can
+process images and output their global descriptors and/or local feature sets.
+
+The extractor uses TensorFlow’s SavedModel format to load the trained DELG model
+and dynamically configures it based on the provided configuration. It supports
+preprocessing of images, resizing, and post-processing of extracted features.
+While some legacy support code exists for PCA and whitening, these are not
+utilized in the current DELG implementation.
 
 Notes:
 ------
-
 Author: Duje Giljanović (giljanovic.duje@gmail.com)
 License: Apache License 2.0 (same as the official DELG implementation)
 
 This package uses the DELG model originally developed by Google Research and published
-in paper "Unifying Deep Local and Global Features for Image Search" authored by Bingyi Cao,
+in the paper "Unifying Deep Local and Global Features for Image Search" authored by Bingyi Cao,
 Andre Araujo, and Jack Sim.
 
 If you use this Python package in your research or any other publication, please cite both this

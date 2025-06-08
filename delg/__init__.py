@@ -3,32 +3,33 @@ delg
 ====
 
 This is the package entry point for the DELG feature extractor. It initializes
-the Docker container when not running inside Docker and exposes the key
-functions needed for global and local feature extraction.
+the Docker container (if not running inside Docker) and exposes key functions
+needed for extracting global and local features from images using the DELG model.
+
+Main purpose:
+-------------
+- Provides seamless orchestration of model downloads, container management, and feature extraction.
 
 Public functions:
 -----------------
-
--   extract_global_features: Extracts global features from one or more images.
--   extract_local_features: Extracts local features from one or more images.
--   update_global_config: Updates the 'use_pca' setting in the global DELG config file.
--   update_local_config: Updates the 'use_pca', 'max_feature_num', and 'score_threshold'
-    settings in the local DELG config file.
--   set_docker_config: Sets Docker runtime configuration variables.
--   cosine_similarity: Computes cosine similarity between two global descriptor vectors.
--   local_feature_match: Determines whether two images match based on their local features.
--   download_weights: Downloads the DELG model weights and extracts them.
+- extract_global_features: Extracts global features from one or more images.
+- extract_local_features: Extracts local features from one or more images.
+- update_local_config: Updates the 'use_pca', 'max_feature_num', and 'score_threshold'
+  settings in the local DELG config file.
+- set_docker_config: Sets Docker runtime configuration variables.
+- cosine_similarity: Computes cosine similarity between two global descriptor vectors.
+- local_feature_match: Determines whether two images match based on their local features.
+- download_weights: Downloads the DELG model weights and extracts them.
 
 For more information on the functions, refer to their docstrings.
 
 Notes:
 ------
-
 Author: Duje Giljanović (giljanovic.duje@gmail.com)
 License: Apache License 2.0 (same as the official DELG implementation)
 
 This package uses the DELG model originally developed by Google Research and published
-in paper "Unifying Deep Local and Global Features for Image Search" authored by Bingyi Cao,
+in the paper "Unifying Deep Local and Global Features for Image Search" by Bingyi Cao,
 Andre Araujo, and Jack Sim.
 
 If you use this Python package in your research or any other publication, please cite both this
@@ -50,7 +51,6 @@ package and the original DELG paper as follows:
 """
 
 import os
-import sys
 
 PACKAGE_DIR = os.path.dirname(__file__)
 MODEL_WEIGHTS_PATH = os.path.join(
