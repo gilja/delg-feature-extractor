@@ -1,3 +1,4 @@
 delg/**/__pycache__/
 examples
 delg/**/parameters
+delg.egg-info
