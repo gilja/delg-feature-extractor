@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "delg"
-version = "0.1.0"
+version = "0.1.1"
 description = "delg: A Python Package for Dockerized DELG Implementation"
 authors = [
     { name = "Duje Giljanović", email = "giljanovic.duje@gmail.com" }
