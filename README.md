@@ -63,8 +63,7 @@ You must have **Docker** installed and properly set up on your machine. Below ar
 >
 > You should see the Docker version information displayed.
 
-
-
+&nbsp;
 
 ## Installation
 
@@ -77,6 +76,8 @@ To install delg simply run
 > ```sh
 > pip install delg
 > ```
+
+&nbsp;
 
 ## Usage
 
